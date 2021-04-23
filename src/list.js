@@ -11,7 +11,7 @@ import Edit from './assets/img/editpic.png';
 import Delete from './assets/img/deletepic.png';
 import Cancel from './assets/img/cancel.png';
 import Modal from 'react-modal';
-
+import {useHistory, NavLink} from  'react-router-dom';
 
 const customStyles = {
     content : {
@@ -51,20 +51,20 @@ const StyledTableCell = withStyles((theme) => ({
   });
   
 const List = () => {
-
+    let history = useHistory();
+    // const [submittedData, setSubmittedData] = useState([]);
+   
+    let [formData, setFormData] = useState({});
     const classes = useStyles();
     const [listData, setListdata] = useState([]);
-    
-    const [updateTask, setupdateTask] = useState('');
+    const [idx, setIdx] =useState(null);
+    const [arr, setArr ] = useState([]);
+ 
      useEffect(() => {
          getDataLs();   
    }, [listData])
 
-//    function randomNumberID(){
-//     return Math.floor(Math.random()*(1000002 - 1 + 1)) + 1;
-   
-//   }
-//   randomNumberID()
+
   
    const getDataLs = () => {
     let getData = JSON.parse(localStorage.getItem("newdata"));
@@ -79,30 +79,28 @@ const List = () => {
     
    }
 
-//    const updateButton = (index) => {
-//     let ids = listData.indexOf(index);
-//     let task2 = JSON.parse(localStorage.getItem("newdata"));
-//     task2[ids] = updateTask
-//     localStorage.setItem("newdata",JSON.stringify(task2))
-//    setListdata(JSON.parse(localStorage.getItem("newdata")));
-//    }
-
-   const updateValue = index => {
-       const newValues = [...listData];
-       newValues[index] = true;
-       setListdata(newValues);
-   }
-
-
+   var subtitle;
    
 
+   const [modalIsOpen,setIsOpen] = useState(false);
 
-   var subtitle;
-   const [modalIsOpen,setIsOpen] = React.useState(false);
-   function openModal() {
-     setIsOpen(true);
+   function openModal(items,index) {
+
+    setFormData({...items})
+       console.log(formData)
+        setIsOpen(true)
+        setIdx(index)
+        arr.splice(0,1,items)
    }
  
+
+   const updateValue = (id) =>{
+    let data = JSON.parse(localStorage.getItem("newdata"))
+    data.splice(idx,1,formData)
+    localStorage.setItem("newdata",JSON.stringify(data))
+    alert('Data updated successfully')
+    setIsOpen(false)
+   }
    function afterOpenModal() {
      // references are now sync'd and can be accessed.
      subtitle.style.color = '#f00';
@@ -145,7 +143,7 @@ const List = () => {
               <StyledTableCell align="right">{items.profession}</StyledTableCell>
               <StyledTableCell align="right">{items.city}</StyledTableCell>
               <StyledTableCell align="right">
-                <button onClick={openModal}>
+                <button onClick={() => openModal(items,index)}>
                    <img style={{width:"20px", height:"20px"}} src={Edit} alt="edit" />
                    
                 </button>
@@ -155,19 +153,27 @@ const List = () => {
           onRequestClose={closeModal}
           style={customStyles}
           contentLabel="Example Modal"
-        ><h2 ref={_subtitle => (subtitle = _subtitle)}>Edit Details</h2>
-         
-         
+        >
+         <h2 ref={_subtitle => (subtitle = _subtitle)}>Edit Details</h2>
+        {arr.map((items,index) => {return (
+          <div>
           <form >
-            <input type="text" placeholder={items.username} onChange={(e) => setupdateTask(e.target.value)}></input>
-            <input type="text" placeholder={items.age} onChange={(e) => setupdateTask(e.target.value)}></input>
-            <input type="text" placeholder={items.gender} onChange={(e) => setupdateTask(e.target.value)}></input>
-            <input type="text" placeholder={items.education} onChange={(e) => setupdateTask(e.target.value)}></input>
-            <input type="text" placeholder={items.profession} onChange={(e) => setupdateTask(e.target.value)}></input>
-            <input type="text" placeholder={items.city} onChange={(e) => setupdateTask(e.target.value)}></input>
-            <button type="submit" onClick={() => updateValue(index)} >Update</button>
+            <input type="text" defaultValue={items.username} onChange={(e)=>setFormData({...formData, username:e.target.value})} ></input>
+            <input type="text" defaultValue={items.age} onChange={(e)=>setFormData({...formData, age: e.target.value})}></input>
+            <input type="text"  defaultValue={items.gender} onChange={(e)=>setFormData({...formData, gender: e.target.value})} ></input>
+            <input type="text"  defaultValue={items.education} onChange={(e)=>setFormData({...formData, education: e.target.value})}></input>
+            <input type="text"  defaultValue={items.profession} onChange={(e)=>setFormData({...formData, profession: e.target.value})}></input>
+            <input type="text"  defaultValue={items.city} onChange={(e)=>setFormData({...formData, city: e.target.value})}></input>
+            <button type="submit" onClick={() => updateValue()} >Update</button>
+            <button onClick={closeModal}> <img style={{ width:"30px", height:"30px", border:"none", outlineStyle:"none"}} src={Cancel} alt="cancel" /></button>
           </form>
-          <button onClick={closeModal}> <img style={{ width:"30px", height:"30px", border:"none", outlineStyle:"none"}} src={Cancel} alt="cancel" /></button>
+          
+          </div>
+        )})}
+       
+         
+         
+         
         </Modal>
                 <button onClick={() =>DeleteRow(index)}>
                    <img style={{width:"20px", height:"20px"}} src={Delete} alt="edit" />
@@ -184,6 +190,9 @@ const List = () => {
         
       </Table>
     </TableContainer>
+    <div>
+     {/* <button><NavLink to={history.push("/")}>Back to home</NavLink></button> */}
+    </div>
             </div>
         </div>
     )
